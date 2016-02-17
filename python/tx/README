@@ -1,0 +1,18 @@
+TX.py
+=====
+
+1- Introduction
+---------------
+
+This a script that saves me a lot of time. Its main purpose
+is to transfer one file at a time from its small database.
+
+For instance, imagine that you have a tool like rtorrent 
+that downloads periodically football matchs of your favourite team. 
+After the file is completed, you would run this small script with 
+the name of the file and after a while you will have.
+
+2- Dependences
+--------------
+
+In order to work, it needs sqlite3 installed. 
