@@ -227,7 +227,7 @@ done
 #Deny everything else
 iptables -A INPUT -j LOGDROP
 
-if [ ! `pgrep fail2ban`  ]; then
+if [ `pgrep fail2ban`  ]; then
 	/etc/init.d/fail2ban restart
 fi
 
