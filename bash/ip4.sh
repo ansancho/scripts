@@ -1,9 +1,10 @@
 #!/bin/bash
 #########################################################
 # This script is intended to create a simple iptables
-# ruleset to protect most of servers.
+# ruleset to protect most of the personal servers.
 # If you want black lists it needs GNU awk not Mawk.
 # It also need to have installed wget.
+# Variable names are self explanatory
 #########################################################
 
 if [ "$UID" -ne 0 ]; then
