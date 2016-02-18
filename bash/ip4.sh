@@ -171,7 +171,7 @@ if [ $BLACKLISTS -eq 1 ]; then
 			}' $file1 $file2 $file3
 		rm -f $file1 $file2 $file3
 	else
-		echo "The black lists could not have been downloaded"
+		echo "The black lists could not been downloaded"
 	fi		
 fi
 
