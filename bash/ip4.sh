@@ -6,7 +6,7 @@
 # It also need to have installed wget.
 #########################################################
 
-if [ $(ID) -ne 0 ]; then
+if [ "$UID" -ne 0 ]; then
         echo "You must be administrator to run $0"
         exit 1;
 fi
@@ -99,7 +99,7 @@ if [ $SSHBRUTE -eq 1 ]; then
 	iptables -A SSHBRUTE -j ACCEPT
 fi
 
-if [ $FLOOD -eq 1]; then
+if [ $FLOOD -eq 1 ]; then
 	iptables -N FLOOD
 	iptables -A FLOOD -m recent --name FLOOD --set
 	iptables -A FLOOD -m recent --name FLOOD --update --rttl --seconds 30 --hitcount 15 -m limit --limit 1/second --limit-burst 15 -j LOG --log-prefix "[FLOOD]:"
@@ -113,14 +113,14 @@ iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -i lo -j ACCEPT
 
 
-if [ $BLACKLISTS -eq 1]; then
-	KO = 0
+if [ $BLACKLISTS -eq 1 ]; then
+	KO=0
 	#si wget no descargó nada salimos.
-	wget --timeout=5 --quiet $uf1 -O $file1 || KO = 1
-	wget --timeout=5 --quiet $uf2 -O $file2 || KO = 1
-	wget --timeout=5 --quiet $uf3 -O $file3 || KO = 1
+	wget --timeout=5 --quiet $uf1 -O $file1 || KO=1
+	wget --timeout=5 --quiet $uf2 -O $file2 || KO=1
+	wget --timeout=5 --quiet $uf3 -O $file3 || KO=1
 
-	if [ ! $KO ]; then
+	if [ $KO -eq 0 ]; then
 
 		awk --posix \
 			'BEGIN { 
@@ -196,7 +196,7 @@ iptables -A INPUT -m conntrack --ctstate INVALID -j ILOGDROP
 iptables -A INPUT -p tcp --tcp-flags ALL NONE -j LOGDROP
 
 for i in ${icmp4_types[@]}; do
-	if [ $FLOOD -eq 1]; then
+	if [ $FLOOD -eq 1 ]; then
 		iptables -A INPUT -p icmp -m icmp --icmp-type $i -j FLOOD
 	else
 		iptables -A INPUT -p icmp -m icmp --icmp-type $i -j ACCEPT
@@ -204,8 +204,8 @@ for i in ${icmp4_types[@]}; do
 done
 
 for i in ${tcp4_ports[@]}; do
-        if [ $FLOOD -eq 1]; then
-		if [ $i -eq 22] && [ $SSHBRUTE -eq 1]; then
+        if [ $FLOOD -eq 1 ]; then
+		if [ $i -eq 22 ] && [ $SSHBRUTE -eq 1 ]; then
 			iptables -A INPUT -p tcp -m state --state NEW --dport $i -j SSHBRUTE
 		else
 			iptables -A INPUT -p tcp -m state --state NEW --dport $i -j FLOOD
@@ -217,7 +217,7 @@ done
 
 
 for i in ${udp4_ports[@]}; do
-        if [ $FLOOD -eq 1]; then
+        if [ $FLOOD -eq 1 ]; then
         	iptables -A INPUT -p udp -m state --state NEW --dport $i -j FLOOD
         else
         	iptables -A INPUT -p udp -m state --state NEW --dport $i -j ACCEPT
