@@ -7,9 +7,6 @@ useful for me in some way.
 INDEX
 -----
 
-bash/ipv4.sh ------------- Firewall Script for iptables with blacklists.
-python/tx.py ------------- Script to automate transfer of files.
-
-
-Regards,
-Ángel Sancho
+bash/firewall/ipv4-linux.sh -------- Firewall Script for iptables with blacklists.
+bash/firewall/ipv4-routeros.sh ----- Firewall Script for RouterOs with blacklists.
+python/tx.py ----------------------- Script to automate transfer of files.
