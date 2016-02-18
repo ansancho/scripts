@@ -4,6 +4,12 @@ This repository holds several system administration scripts that are
 useful for me in some way. 
  Feel free to explore, copy, fork or whatever you want to do with them.
 
+INDEX
+-----
+
+bash/ipv4.sh ------------- Firewall Script for iptables with blacklists.
+python/tx.py ------------- Script to automate transfer of files.
+
 
 Regards,
 Ángel Sancho
