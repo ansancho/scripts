@@ -1,5 +1,5 @@
 Extract.py
 ----------
 
-Extracts attachments from MAIL files. Useful for upload binary files
-to http://virustotal.com
+Extracts attachments from rfc822 MAIL files. Useful for inspect or
+upload binary files to http://virustotal.com
