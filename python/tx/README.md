@@ -120,30 +120,30 @@ make compliance checks.
 
 Explanation of fields:
 
-*address : Host as in .ssh/config host field.
-*bandwith: Kbytes / second that rsync will use.
-*localpath: where rtorrent files are put and ended with slash
-*remotepath: path in home server with permission and ended with slash
-*timeout: after this time in seconds the transfer is considered stalled
+* address : Host as in .ssh/config host field.
+* bandwith: Kbytes / second that rsync will use.
+* localpath: where rtorrent files are put and ended with slash
+* remotepath: path in home server with permission and ended with slash
+* timeout: after this time in seconds the transfer is considered stalled
 and will be tried again if max attempts have not been reached.
-*max_attempts: Maximum number of tries before a transfer is considered failed.
-*disable: to disable this script.
-*log: if yes, it will log to tx.log everything.
-*notify: if you have a mail server it will send you an email in case a transfer has failed.
-*emailserver: if notify : yes, the mail server
-*destaddress: email address in case notify and email server are configured.
+* max_attempts: Maximum number of tries before a transfer is considered failed.
+* disable: to disable this script.
+* log: if yes, it will log to tx.log everything.
+* notify: if you have a mail server it will send you an email in case a transfer has failed.
+* emailserver: if notify : yes, the mail server
+* destaddress: email address in case notify and email server are configured.
 
 
 #### Manual invocation
 
-*If you want to transfer a file with this program just type:
+* If you want to transfer a file with this program just type:
 
     server$ ./bin/tx.py 'Name of file'
 
 Please only write the name of the file because the directory is already
 taken into account in the configuration file.
 
-*If you want to resume a transfer, for example after a power outage or
+* If you want to resume a transfer, for example after a power outage or
 a inexpected server reboot simply type:
 
     server$ ./bin/tx.py
@@ -151,7 +151,7 @@ a inexpected server reboot simply type:
 The script will open the small database 'tx.db' and will know if it has
 to resume file transfering.
 
-*If you want to know how long the queue is make a small query to the database:
+* If you want to know how long the queue is make a small query to the database:
 ```   
    server$ sqlite3 ~/bin/tx.db
    sqlite> SELECT * FROM files;
