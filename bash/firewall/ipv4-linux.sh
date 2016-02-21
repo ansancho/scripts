@@ -19,16 +19,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #Configure this if you want to use blacklists
 BLACKLISTS=1
 
-#tmp files
-file1=/tmp/drop.lasso
-file2=/tmp/edrop.lasso
-file3=/tmp/top20.txt
-file4=$DIR/blacklisted.custom
-#URL of most used black lists
-uf1="http://www.spamhaus.org/drop/drop.lasso"
-uf2="http://www.spamhaus.org/drop/edrop.lasso"
-uf3="http://feeds.dshield.org/block.txt"
-
 #anti-flood
 #if its configured then traffic becoming from
 #offender IP it is blocked if it generates more
