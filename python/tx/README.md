@@ -51,6 +51,7 @@ Configure ssh client to automate the use of the private key
 
 Type something like:
 
+```
 -----------------------------------------------
 Host            	home_name
 Hostname        	some_real_ip_or_hostname
@@ -59,6 +60,7 @@ Compression     	no
 StrictHostKeyChecking 	no
 IdentityFile   		 ~/.ssh/home_name_key
 -----------------------------------------------
+```
 
 To know if rsync will work, you should transfer a file:
 
