@@ -2,7 +2,8 @@
 #########################################################
 # This script is intended to create a simple iptables
 # ruleset to protect most of the personal servers.
-# If you want black lists it needs GNU awk not Mawk.
+# If you want to use black lists the script needs 
+# GNU awk not Mawk.
 # It also need to have installed wget.
 # Variable names are self explanatory
 #########################################################
@@ -12,6 +13,9 @@ if [ "$UID" -ne 0 ]; then
         exit 1;
 fi
 
+#Real path of the script.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 #Configure this if you want to use blacklists
 BLACKLISTS=1
 
@@ -19,6 +23,7 @@ BLACKLISTS=1
 file1=/tmp/drop.lasso
 file2=/tmp/edrop.lasso
 file3=/tmp/top20.txt
+file4=$DIR/blacklisted.custom
 #URL of most used black lists
 uf1="http://www.spamhaus.org/drop/drop.lasso"
 uf2="http://www.spamhaus.org/drop/edrop.lasso"
@@ -74,6 +79,9 @@ if [ $BLACKLISTS -eq 1 ]; then
 	iptables -A SPAMHAUS -p udp -m limit --limit 30/min -j LOG --log-prefix "SPAMHAUS - UDP4: " --log-level debug
 	iptables -A SPAMHAUS -p icmp -m limit --limit 30/min -j LOG --log-prefix "SPAMHAUS - ICMP4: " --log-level debug
 	iptables -A SPAMHAUS -j DROP
+	if [ ! -f $file4 ]; then
+                touch $file4;
+        fi
 fi
 
 iptables -N ILOGDROP
@@ -85,12 +93,12 @@ iptables -A LOGACCEPT -m limit --limit 120/min -j LOG --log-prefix "firewall - A
 iptables -A LOGACCEPT -j ACCEPT
 
 
-#Deshabilitamos reenvio mediante policita por defecto.
 if [ $FORWARDING -eq 0 ]; then
 	echo 0 > /proc/sys/net/ipv4/ip_forward	
 	iptables -A FORWARD -j LOG --log-prefix "firewall - FWD Denied4:" --log-level debug
 	iptables -A FORWARD -j DROP
 fi
+
 
 if [ $SSHBRUTE -eq 1 ]; then
 	iptables -N SSHBRUTE
@@ -115,8 +123,18 @@ iptables -A INPUT -i lo -j ACCEPT
 
 
 if [ $BLACKLISTS -eq 1 ]; then
+
+	#files
+	file1=/tmp/drop.lasso
+	file2=/tmp/edrop.lasso
+	file3=/tmp/top20.txt
+	file4=$DIR/blacklisted.custom
+	#URL of most used black lists
+	uf1="http://www.spamhaus.org/drop/drop.lasso"
+	uf2="http://www.spamhaus.org/drop/edrop.lasso"
+	uf3="http://feeds.dshield.org/block.txt"
 	KO=0
-	#si wget no descargó nada salimos.
+		
 	wget --timeout=5 --quiet $uf1 -O $file1 || KO=1
 	wget --timeout=5 --quiet $uf2 -O $file2 || KO=1
 	wget --timeout=5 --quiet $uf3 -O $file3 || KO=1
@@ -154,7 +172,11 @@ if [ $BLACKLISTS -eq 1 ]; then
 					if (match($0,f12)){
 						system("iptables -A INPUT -s " substr($0,RSTART,RLENGTH) " -j SPAMHAUS -m comment --comment Spamhaus-edrop")
 					}	
-				}else{
+				} else if (file == 4){
+                                        if (match($0,f12)){
+                                                system("iptables -A INPUT -s " substr($0,RSTART,RLENGTH) " -j LOGDROP -m comment --comment Custom-blacklisted")
+                                        }
+                                } else{
 				if (match($0,f3)){
 						system("iptables -A INPUT -s " substr($0,RSTART,RLENGTH) " -j SPAMHAUS -m comment --comment Dshield-top20")
 					}
@@ -162,27 +184,25 @@ if [ $BLACKLISTS -eq 1 ]; then
 			}
 
 			END { 
-				if(file!=3){
-					print "Error de procesado: deberia haber 3 ficheros"
+				if(file!=4){
+					print "Processing error: There should be four files"
 					exit 1
 			} else {
 					exit 0
 			}  
 		
-			}' $file1 $file2 $file3
+			}' $file1 $file2 $file3 $file4
 		rm -f $file1 $file2 $file3
 	else
-		echo "The black lists could not been downloaded"
+		echo "Black lists could not be downloaded"
 	fi		
 fi
 
 if [ $UNICAST -eq 1 ]; then
-
-	#filtrado de broadcasts sin LOGGING
+	
+	#Filter and not log: broadcast, multicast and anycast
 	iptables -A INPUT -m addrtype --dst-type broadcast -j DROP
-	#filtrado de multicasts sin LOGGING
 	iptables -A INPUT -m addrtype --dst-type multicast -j DROP
-	#anycast
 	iptables -A INPUT -m addrtype --dst-type anycast -j DROP
 	iptables -A INPUT -d 224.0.0.0/4 -j DROP
 
@@ -228,8 +248,10 @@ done
 #Deny everything else
 iptables -A INPUT -j LOGDROP
 
+
+#refresh fail2ban rules
 if [ `pgrep fail2ban`  ]; then
-	/etc/init.d/fail2ban restart
+	fail2ban-client stop && fail2ban-client start
 fi
 
 exit 0;
