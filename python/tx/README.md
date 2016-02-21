@@ -152,9 +152,10 @@ The script will open the small database 'tx.db' and will know if it has
 to resume file transfering.
 
 *If you want to know how long the queue is make a small query to the database:
-   
+```   
    server$ sqlite3 ~/bin/tx.db
    sqlite> SELECT * FROM files;
+```
 
 #### Disclaimer
 
