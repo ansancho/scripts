@@ -47,7 +47,7 @@ ssh server_name
 
 Configure ssh client to automate the use of the private key
 
-    vi ~/.ssh/config
+    # vi ~/.ssh/config
 
 Type something like:
 
