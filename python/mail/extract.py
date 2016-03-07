@@ -12,8 +12,7 @@ def main():
 		for i in m:
 			if ("application" in i.get_content_type()):
 				open(i.get_filename(), 'wb').write(i.get_payload(decode=True))
-	
-		
+		sys.exit(0)				
 		
 if __name__ == "__main__":
         main()
