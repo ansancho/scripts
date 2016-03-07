@@ -12,26 +12,26 @@ import  os
 import sys
 import datetime
 t = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-listado = "./novedades"
-logerror = "./error_copiando"
-error_log = open(logerror,"w")
+listado = "./newfiles"
+logerror = "./error_log"
 try:
 	fich = open("/var/log/xferlog","r")
 except Exception, msg:
 	print("There is not any xferlog file in the usual path: /var/log/xferlog\n")
 	sys.exit(1)
-	
+
 if (os.path.getsize('/var/log/xferlog') == 0):
 	fich.close()
-	sys.stderr.write('Empty xferlog file. There are not any files\n')
+	sys.stderr.write('Empty xferlog file. There are not any files to copy\n')
 	sys.exit(1)
+error_log = open(logerror,"w")
 fich2 = open(listado,"w")
 if (len(sys.argv)!=3):
-	sys.stderr.write('Uso:' + sys.argv[0] + ' <Source directory> <Destination directory>\n')
+	sys.stderr.write('Use:' + sys.argv[0] + ' <Source directory> <Destination directory>\n')
 	sys.exit(1)
 else:
 	if not (os.path.exists(sys.argv[1])) or not (os.path.exists(sys.argv[2])):
-		sys.stderr.write('Uso:' + sys.argv[0] + ' <Source directory> <Destination directory>\n')
+		sys.stderr.write('Use:' + sys.argv[0] + ' <Source directory> <Destination directory>\n')
 		sys.exit(1)
 	else:
 		origen = sys.argv[1]
