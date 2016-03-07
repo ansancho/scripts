@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*- 
+"""
+	The purpose of this script
+	is to parse vsftp log files
+	and try to synchronize two
+	directories.
+"""
+from shutil import copy2, copytree
+from string import rstrip
+import  os
+import sys
+import datetime
+t = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+listado = "./novedades"
+logerror = "./error_copiando"
+error_log = open(logerror,"w")
+try:
+	fich = open("/var/log/xferlog","r")
+except Exception, msg:
+	print("There is not any xferlog file in the usual path: /var/log/xferlog\n")
+	sys.exit(1)
+	
+if (os.path.getsize('/var/log/xferlog') == 0):
+	fich.close()
+	sys.stderr.write('Empty xferlog file. There are not any files\n')
+	sys.exit(1)
+fich2 = open(listado,"w")
+if (len(sys.argv)!=3):
+	sys.stderr.write('Uso:' + sys.argv[0] + ' <Source directory> <Destination directory>\n')
+	sys.exit(1)
+else:
+	if not (os.path.exists(sys.argv[1])) or not (os.path.exists(sys.argv[2])):
+		sys.stderr.write('Uso:' + sys.argv[0] + ' <Source directory> <Destination directory>\n')
+		sys.exit(1)
+	else:
+		origen = sys.argv[1]
+		destino = sys.argv[2]
+		print("All files of " +sys.argv[1])
+		print("That have been uploaded to the FTP will be overwritten "+sys.argv[2])
+		ass = raw_input("[N]S\n")
+		if not (ass=='s' or ass=='S'):
+			print("Cancelling...\n")
+			sys.exit(1)
+				
+for l in fich:
+	cab = l.split()
+	ficherin = cab[8]
+	if ".js" in ficherin or ".php" in ficherin:
+		print("Skipping file: "+ficherin )
+		#Omitting PHP and JS files
+		continue
+	else:
+		fich2.write(ficherin +'\n')
+fich.close()
+fich2.close()
+fich2 = open("./novedades","r")
+num = 0
+for l in fich2:
+	o=os.path.join(origen, l.strip('\n')[1:])
+	d=os.path.join(destino,l.strip('\n')[1:])
+	try:
+		if (not os.path.exists(os.path.dirname(d))):
+			try:
+				print("Creating directory "+os.path.dirname(d)) 
+				os.makedirs(os.path.dirname(d),0755)
+			except Exception, msg:
+				print("Error when creating directory "+str(msg))
+				error_log.write("Error when creating directory "+str(msg)+"\n")
+		if (os.path.exists(os.path.dirname(d)+"/"+os.path.basename(o))):
+			try:
+				print("Backing up file "+os.path.dirname(d)+"/"+os.path.basename(o))
+				copy2(d,d+".BAK"+"-"+t)
+			except Exception, msg:
+				print("Error when backing up file "+str(msg))
+				error_log.write("Error when backing up file "+str(msg)+"\n")
+		print("Copying "+ o + " ==> "+ d)
+		copy2(o,d)
+		num += 1
+	except Exception, msg:
+		print("Error when copying "+str(msg))
+		error_log.write("Error when copying "+str(msg)+"\n")
+
+for r00t, dirs , archs in os.walk(destino):
+	for i in dirs:
+		dir = os.path.join(r00t, i)
+		try:
+                        print("Applying permissions to "+str(dir))
+                        os.chown(dir,48,48)
+                        os.chmod(dir,0755)
+                except Exception, msg:
+                        print("Error when applying permissions to "+str(msg))
+	for j in archs:
+		file = os.path.join(r00t, j)
+		try:
+                        print("Applying permissions to "+str(file))
+                        os.chown(file,48,48)
+                        os.chmod(file,0644)
+                except Exception, msg:
+                        print("Error when applying permissions to "+str(msg))
+	
+fich2.close()
+os.remove(listado)
+error_log.close()
+error_log=open(logerror,"r")
+print(str(num) + " files have been copied\n")
+print("Following files have been not copied: \n")
+for i in error_log:
+	print(i)
+error_log.close()
+os.remove(logerror)
+sys.exit(0)
