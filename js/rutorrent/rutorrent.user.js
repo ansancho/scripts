@@ -1,7 +1,8 @@
 // ==UserScript==
-// @name        rutorrent
+// @name        rutorrentlinksender
 // @namespace   ansancho
-// @description Script to send links to your seedbox
+// @description Script to send links to your rutorrent seedbox
+// @description based heavily on http://userscripts-mirror.org/scripts/show/149711 by  auspexpt
 // @version     1
 // @require  http://code.jquery.com/jquery-1.7.2.min.js
 // @match https://what.cd/*
@@ -14,23 +15,33 @@ $(document).ready(function () {
 	if (unsafeWindow.console) {
 		var GM_log = unsafeWindow.console.log;
 	}
+	
+//URL of your rutorrent server.
+
 	var rutorrent_url = "https://my.server.com"; 
 	//if credentials are stored in the browser it will ask for them.
 	//var username = "xxx";
 	//var password = "xxx";
 	var start_stopped = true;
 
+//Regex of torrent links.
+
 	var sites = {
 		'whatcd' : 'what\\.cd/torrents\\.php\\?action=download\\&id',		
 		'ptp' : 'tls\\.passthepopcorn\\.me/torrents\\.php\\?action=download\\&id=',		
 		'btn' : 'broadcasthe\\.net/torrents\\.php\\?action=download\\&id=',		
 	};
+	
+// Site's Cookies. For now, on ptp and w.cd are not necessary, because auth goes on GET petitions.
+
 	var cookies = {
 	    'btn'	: {
 	    	'PHPSESSID': null, '__cfduid' : 'your_value',
 	    	'keeplogged':'your_value'
 	    },	
 	};
+
+// Do not edit below this line
 
 	var images = {
 		'base': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNXG14zYAAAAWdEVYdENyZWF0aW9uIFRpbWUAMDcvMzAvMTJrz/NTAAACAUlEQVQokXWPPUxTYRiFn6/3tnjb4ICFFChoUoFKSGSzagJKojHBCSY2VxdlYGGRQXeDi4ORqIsmhtloYhQVBkkIOCCgplKJGEGh/PTv9t7jICbF6LO9J+85Ocfcul3sXk7bdz+nTaJQEJ5vcF3wPKiuNoRCYmsbSkVwHKg+WJ7HvLtk1cWuvZqYsA+/njAmm4WgDfUxEW8UMzMlpiZtmhqhvV1sbvgsLdmH7KB1lhOnSkq0SEND0uSkp1zOl+RL8jQy8l69vbsql7VHSVeubvotyXWRaHV1/caOpJIq8X1pbW1XuZy3T19Y+OofbX1ZDtTUWDx6uMPY2AcqMQaiUQfHKe3Tv6ysUCisGrp7XIGrVCorya3I9jQ6+kL9/U+0sbEuqajZ2SmlTj7wW5Jpz5bADtpYVgRQRbZIp0OMj3cyPb1Cbe1zPn0MgXWRtqSFvfeDZfmA2VcrHLaBIJlMB5lMBwCxBvD9NQIA5bKoqwN+n39WEotVAQX+gQJbWeg6YxgeDv5lDNDXl2Bw0CEer3Bor2Jbu6d797f1f3IaGHgjKAik+gb5p7uyMj3ntpctk493Hl8MJI9BOGJjBK7rk83mmJ37zrOnR8jnU1h2QPWNniKRtz9Nd8/N88XihTur36qad7YWMSYLxkeygDCO00w02oRt5wlVHRCa+7E4f/nxLypMPev0B8piAAAAAElFTkSuQmCC',
