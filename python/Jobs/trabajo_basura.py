@@ -26,11 +26,11 @@ def parse_rows(rows):
     """ Get data from rows """
     results = []
     for row in rows:
-        table_headers = row.find_all('th')
-        if table_headers:
-            results.append([headers.get_text() for headers in table_headers])
-
-        table_data = row.find_all('td')
+        #table_headers = row.find_all('th')
+        #if table_headers:
+        #    results.append([headers.get_text() for headers in table_headers])		
+        table_data = row.find_all('td',attrs = {'class' : ['lin0','lin1']})
+        #table_data = row.find_all('td')
         if table_data:
             results.append([data.get_text() for data in table_data])
     return results
@@ -53,9 +53,10 @@ def main():
     sess.post('http://www.trabajobasura.info/ingresar.php', data=payload)
     try:   
           response = sess.get('http://www.trabajobasura.info/directorio/')
-          soup = BeautifulSoup(response.content, "lxml" )          
+          soup = BeautifulSoup(response.content, 'html.parser' )          
           try :
                  tabla = soup.find('table')
+                
                  rows = tabla.find_all('tr')
                  table_data = parse_rows(rows)
                  for i in table_data:
