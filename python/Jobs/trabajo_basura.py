@@ -2,9 +2,25 @@
 import sys
 from urllib import urlencode
 from urllib2 import urlopen, URLError, build_opener
-from requests import session
+from requests import session, RequestException
 from argparse import ArgumentParser
 from bs4 import BeautifulSoup
+from time import sleep
+import logging
+
+'''
+Global variables
+'''
+directorio = 'http://www.trabajobasura.info/directorio/'
+authurl = 'http://www.trabajobasura.info/ingresar.php'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0'    
+}
+params = {
+    'action': 'ingresar.php',
+    'emailF': "",
+    'passwordF': ""
+}
 
 
 def parse_arguments():
@@ -16,7 +32,10 @@ def parse_arguments():
     					required=True)
     parser.add_argument('-p', '--passw',
     				    help='User password',
-    				    required=True)    					
+    				    required=True)
+    parser.add_argument('-d','--debug',                        
+    					help='Print debug messages, write something like true or True',
+    					required=False)
     args = parser.parse_args()
     return args
 
@@ -28,49 +47,55 @@ def parse_table(table):
           for j in i.find_all('td',attrs = {'class' : ['lin0','lin1']}):            
               print j.get_text()        
           print "****"
-            #tmp.append(j.get_text())
-            #print j.getText(separator='\t',strip=True)          	
-#        results.append("\t".join(tmp))
      return "\n".join(results)
      
 def main():
     # Get arguments
     args = parse_arguments()
+    logging.basicConfig()
+    logger = logging.getLogger(__name__)
     if (args.user) and (args.passw):        
-        user = args.user
-        passw = args.passw
+        params['emailF']= args.user
+        params['passwordF'] = args.passw
+    if (args.debug):
+    	logger.setLevel(logging.DEBUG)
+    else:
+    	logger.setLevel(logging.INFO)
   
-  	directorio = 'http://www.trabajobasura.info/directorio/?pag='
-    authurl = 'http://www.trabajobasura.info/ingresar.php'
-    payload = {
-    'action': 'ingresar.php',
-    'emailF': user,
-    'passwordF': passw }
     
-    headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0'    
-	}
 
-    sess = session()  
-    sess.post(authurl, data=payload)
-    
-    try:   
-          response = sess.get(directorio,headers=headers)
-          soup = BeautifulSoup(response.content, 'html.parser' )
-          try :
-                 table = soup.find('table')
-                 
-                 datos = parse_table(table)
-                 print datos
-                                        
-          except AttributeError as e:
-                 print 'No tables found, exiting'
-                 sys.exit(1)
+    try:
+        sess = session()  
+        sess.post(authurl, data=params)
+        response = sess.get(directorio,headers=headers)
+        soup = BeautifulSoup(response.content,'html.parser')
+        ''' The index of directory pages are in the font tags '''
+        index = len(soup.find_all('table')[0].find_all('font'))
+        logger.debug(index)
+        
+        tables = ""
+        for i in range (1,3):
+            logger.info("Procesando " + directorio+ "?pag=" + str(i))
+            response = sess.get(directorio+ "?pag=" + str(i),headers=headers)
+            soup = BeautifulSoup(response.content,'html.parser')
+            tables += str(soup.find_all('table')[-1])
+            ''' We do not want to make DDOS '''
+            sleep (0.5)
+        soupTables=BeautifulSoup(tables,'html.parser')
+      
+        '''		
+            for i in range(2,indice):
+			response = sess.get(directorio+ "?pag=" + str(i),headers=headers)
+			soup = BeautifulSoup(response.content,'html.parser')
+        '''
 
+    except RequestException as sessionError:
+        logger.info('An error occured fetching trabajobasura.info page \n %s\n' % str(sessionError))
+        sys.exit(1)
     except Exception as e:
-   		  print 'An error occured fetching trabajobasura table \n %s' % str(e)
-   		  sys.exit(1)
-   		  
+        logger.info( 'An error occured\n %s\n' % str(e),exc_info=True)
+        sys.exit(1)
+
 if __name__ == '__main__':
     status = main()
     sys.exit(status)
