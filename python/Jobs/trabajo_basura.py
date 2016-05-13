@@ -40,7 +40,7 @@ def main():
         user = args.user
         passw = args.passw
   
-  	directorio = 'http://www.trabajobasura.info/directorio/'
+  	directorio = 'http://www.trabajobasura.info/directorio/?pag='
     authurl = 'http://www.trabajobasura.info/ingresar.php'
     payload = {
     'action': 'ingresar.php',
