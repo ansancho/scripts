@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf8 -*-
 import sys
 from urllib import urlencode
 from urllib2 import urlopen, URLError, build_opener
@@ -106,6 +107,7 @@ def main():
         listado = parse_table(BeautifulSoup(tables,'html.parser'))
         #ordenar por puntuacion
         listado.sort(key=lambda x: x[2], reverse=True)
+        excel.writerow(['Nombre','Enlace directorio','Puntuación','Votos','Enlace empresa'])
         excel.writerows(listado)
         fichero.close()
         sys.exit(1)
