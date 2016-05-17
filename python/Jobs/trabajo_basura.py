@@ -28,17 +28,23 @@ params = {
 def parse_arguments():
     """ Process command line arguments """
     parser = ArgumentParser(description=
-    		'Grabs full directory of companies from http://trabajobasura.info')    
+'Grabs full directory of companies  from http://trabajobasura.info and export them  to a csv file')    
     parser.add_argument('-u', '--user', 
     					help='Registered username. Necessary to retrieve the directory',
-    					required=True)
+    					required=False)
     parser.add_argument('-p', '--passw',
     				    help='User password',
-    				    required=True)
-    parser.add_argument('-d','--debug', nargs='?',
-    					help='Print debug messages, write something like true or True',
+    				    required=False)
+    parser.add_argument('-d','--debug', action='store_true',
+    					help='Print debug messages',
+    					required=False)
+    parser.add_argument('-f','--file', nargs='?',
+    					help='Output csv file, if ommitted then will be junkcs.csv',
     					required=False)
     parser.add_argument('-s','--sort',
+                        choices=['r','R','p','P'],
+                        default='r',
+                        help="Sort companies by rate (r) or popularity (p) ",
                         required=False)
     args = parser.parse_args()
     return args
@@ -75,26 +81,34 @@ def main():
     # Get arguments
     args = parse_arguments()
     logging.basicConfig()
-    logger = logging.getLogger(__name__)
-    fichero = open('junkcs.csv','w')
-    excel   = csv.writer(fichero)
+    logger = logging.getLogger(__name__)    
+    sess = session()
     if (args.user) and (args.passw):        
         params['emailF']= args.user
         params['passwordF'] = args.passw
+        sess.post(authurl, data=params)
     if (args.debug):
     	logger.setLevel(logging.DEBUG)
+    	logger.debug("Debug mode ON")
     else:
     	logger.setLevel(logging.INFO)
+    if (args.file):
+        logger.debug("Opening %s"%args.file)
+        fichero = open(args.file,'w')
+    else:
+        logger.debug("Opening %s"%"junkcs.csv")
+        fichero = open('junkcs.csv','w')
+    excel   = csv.writer(fichero)
+        
   
     
 
-    try:
-        sess = session()  
-        sess.post(authurl, data=params)
+    try:        
         response = sess.get(directorio,headers=headers)
         soup = BeautifulSoup(response.content,'html.parser')
         ''' The index of directory pages are in the font tags '''
-        index = len(soup.find_all('table')[0].find_all('font'))        
+        index = len(soup.find_all('table')[0].find_all('font'))
+        logger.debug("There are %s company pages to retrieve\n" % str(index))      
         
         tables = ""
         for i in range (1,index+1):
@@ -105,9 +119,16 @@ def main():
             ''' We do not want to make DDOS '''
             sleep (0.3)        
         listado = parse_table(BeautifulSoup(tables,'html.parser'))
-        #ordenar por puntuacion
-        listado.sort(key=lambda x: x[2], reverse=True)
-        excel.writerow(['Nombre','Enlace directorio','Puntuación','Votos','Enlace empresa'])
+        
+        #ordenar por puntuacion o por popularidad
+        if (args.sort == 'r') or (args.sort == 'R'):
+            logger.debug("Ordering by rating")
+            listado.sort(key=lambda x: x[2], reverse=True)
+        else:
+            logger.debug("Ordering by popularity")
+            listado.sort(key=lambda x: x[3], reverse=True)
+            
+        excel.writerow(['Name','Database link','Rating','Votes','Company external link'])
         excel.writerows(listado)
         fichero.close()
         sys.exit(1)
