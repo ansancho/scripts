@@ -42,7 +42,7 @@ def parse_arguments():
     					help='Output csv file, if ommitted then will be junkcs.csv',
     					required=False)
     parser.add_argument('-s','--sort',
-                        choices=['r','R','p','P'],
+                        choices=['r','p'],
                         default='r',
                         help="Sort companies by rate (r) or popularity (p) ",
                         required=False)
@@ -121,12 +121,12 @@ def main():
         listado = parse_table(BeautifulSoup(tables,'html.parser'))
         
         #ordenar por puntuacion o por popularidad
-        if (args.sort == 'r') or (args.sort == 'R'):
-            logger.debug("Ordering by rating")
-            listado.sort(key=lambda x: x[2], reverse=True)
-        else:
+        if (args.sort == 'p'):
             logger.debug("Ordering by popularity")
             listado.sort(key=lambda x: x[3], reverse=True)
+        else:
+            logger.debug("Ordering by rating")
+            listado.sort(key=lambda x: x[2], reverse=True)
             
         excel.writerow(['Name','Database link','Rating','Votes','Company external link'])
         excel.writerows(listado)

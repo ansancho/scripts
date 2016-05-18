@@ -7,23 +7,16 @@ all the directory of technological companies listed on http://trabajobasura.info
 exports all info to a csv file for later analysis.
 
 
-usage: trabajo_basura.py [-h] [-u USER] [-p PASSW] [-d] [-f [FILE]]
-                         [-s {r,R,p,P}]
+    usage: trabajo_basura.py [-h] [-u USER] [-p PASSW] [-d] [-f [FILE]] [-s {r,R,p,P}]
+    Grabs full directory of companies from http://trabajobasura.info and export them to a csv file
 
-Grabs full directory of companies from http://trabajobasura.info and export
-them to a csv file
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -u USER, --user USER  Registered username. In case the page asks you for
-                        credentials
-  -p PASSW, --passw PASSW
-                        User password
-  -d, --debug           Print debug messages
-  -f [FILE], --file [FILE]
-                        Output csv file, if ommitted then will be junkcs.csv
-  -s {r,R,p,P}, --sort {r,R,p,P}
-                        Sort companies by rate (r) or popularity (p)
+    optional arguments:
+        -h, --help            show this help message and exit
+        -u USER, --user USER  Registered username. In case the page asks you for credentials
+        -p PASSW, --passw PASSW User password
+        -d, --debug           Print debug messages
+        -f [FILE], --file [FILE] Output csv file, if ommitted then will be junkcs.csv
+        -s {r,R,p,P}, --sort {r,R,p,P} Sort companies by rate (r) or popularity (p)
 
 
 
