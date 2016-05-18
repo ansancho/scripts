@@ -16,7 +16,7 @@ exports all info to a csv file for later analysis.
         -p PASSW, --passw PASSW User password
         -d, --debug           Print debug messages
         -f [FILE], --file [FILE] Output csv file, if ommitted then will be junkcs.csv
-        -s {r,R,p,P}, --sort {r,R,p,P} Sort companies by rate (r) or popularity (p)
+        -s {r,p}, --sort {r,p} Sort companies by rate (r) or popularity (p)
 
 
 
