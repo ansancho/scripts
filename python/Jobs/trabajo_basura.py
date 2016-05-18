@@ -30,7 +30,7 @@ def parse_arguments():
     parser = ArgumentParser(description=
 'Grabs full directory of companies  from http://trabajobasura.info and export them  to a csv file')    
     parser.add_argument('-u', '--user', 
-    					help='Registered username. Necessary to retrieve the directory',
+    					help='Registered username. In case the page asks you for credentials',
     					required=False)
     parser.add_argument('-p', '--passw',
     				    help='User password',
