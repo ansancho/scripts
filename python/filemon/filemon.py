@@ -14,8 +14,6 @@ except ImportError, e:
 
 NUL='/dev/null'
 PID='/tmp/filemon.pid'
-BASEDIR=os.path.abspath(os.path.dirname(__file__))
-
 
 def parse_arguments():
     """ Process command line arguments """
@@ -29,17 +27,14 @@ def parse_arguments():
     help='Send kill signal to daemonized process', required=False)
     return parser.parse_args()
     
-class eventHandler(FileSystemEventHandler):
-    def __init__(self, observer, filename):
-        self.observer = observer
-        self.filename = filename
-
-    def on_modified(self, event):
-        print "e=", event
-        if not event.is_directory and event.src_path.endswith(self.filename):
-            print "file created"
-            self.observer.unschedule_all()
-            self.observer.stop()
+class manejador(FileSystemEventHandler):
+    def on_any_event(event):
+        if event.is_directory:
+            return None
+        elif event.event_type == 'created':           
+            print "Something was created - %s." % event.src_path
+        elif event.event_type == 'modified':            
+            print "Something was modified - %s." % event.src_path    
    
 def daemonize():
     stdin=NUL
@@ -76,7 +71,7 @@ def daemonize():
         
     if pid:
         sys.stderr.write("pid file %s already exist. If there are not \
-                                    other filemon processes running please delete it." % PID)
+other filemon processes running please delete it." % PID)
         
     os.dup2(stdi.fileno(), sys.stdin.fileno())
     os.dup2(stdo.fileno(), sys.stdout.fileno())
@@ -85,8 +80,6 @@ def daemonize():
     pid = str(os.getpid())
     file(PID,'w+').write("%s\n" % pid)
     
-    
-
 def stopDaemon():
     try:
         pidFile = file(PID,'r')
@@ -113,11 +106,15 @@ def main():
     args = parse_arguments()
     if (args.kill):
         stopDaemon()
+    if not (args.file):
+       print "There is no file to watch"
+       sys.exit(1)
     if (args.daemon):
-        daemonize()    
+        daemonize()   
     observer = Observer()
-    event_handler = eventHandler(observer, args.file)
-    observer.schedule(event_handler, BASEDIR, recursive=False)
+    event_handler = manejador(observer, args.file)
+    directorio=os.path.abspath(os.path.dirname(args.file))
+    observer.schedule(event_handler, directorio, recursive=False)
     observer.start()
     try:
         while True:
