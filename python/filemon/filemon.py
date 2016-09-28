@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
 import sys
 import os
-from argparse import ArgumentParser
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
 import time
+from argparse import ArgumentParser
+from signal import SIGTERM
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+except ImportError, e:
+    print str(e)
+    sys.exit(2)
 
 NUL='/dev/null'
+PID='/tmp/filemon.pid'
 BASEDIR=os.path.abspath(os.path.dirname(__file__))
 
 
@@ -19,7 +24,9 @@ def parse_arguments():
             help='Daemonize this process', required=False)
     parser.add_argument('-a','--address',help='email address',
     required=False)
-    parser.add_argument('-f','--file',help='File to watch', required=True)
+    parser.add_argument('-f','--file',help='File to watch', required=False)
+    parser.add_argument('-k','--kill',action='store_true', 
+    help='Send kill signal to daemonized process', required=False)
     return parser.parse_args()
     
 class eventHandler(FileSystemEventHandler):
@@ -43,7 +50,7 @@ def daemonize():
         if pid > 0:
             sys.exit(0)
     except OSError, e:
-        print e
+        sys.stderr.write("Error when forking process: %d (%s)\n" % (e.errno, e.strerror))
         sys.exit(1)
     
     os.chdir("/")
@@ -60,19 +67,52 @@ def daemonize():
     stdo= file(stdout, 'a+')
     stde= file(stderr, 'a+', 0)
     
+    try:
+        pidFile = file(PID,'r')
+        pid = int(pidFile.read().strip())
+        pidFile.close()
+    except IOError:
+        pid = None
+        
+    if pid:
+        sys.stderr.write("pid file %s already exist. If there are not \
+                                    other filemon processes running please delete it." % PID)
+        
     os.dup2(stdi.fileno(), sys.stdin.fileno())
     os.dup2(stdo.fileno(), sys.stdout.fileno())
-    os.dup2(stde.fileno(), sys.stderr.fileno())    
+    os.dup2(stde.fileno(), sys.stderr.fileno())
     
-def main():
+    pid = str(os.getpid())
+    file(PID,'w+').write("%s\n" % pid)
+    
+    
 
+def stopDaemon():
     try:
-           import watchdog
-    except ImportError, e:
-        print "Module python watchdog must be installed"
-        sys.exit(2)
-        
+        pidFile = file(PID,'r')
+        pid = int(pidFile.read().strip())
+        pidFile.close()
+    except IOError:
+       pid = None
+       
+      
+    if not pid:
+       sys.stderr.write("Process is not running\n")
+       sys.exit(0)
+     
+    try:
+        os.kill(pid, SIGTERM)
+        time.sleep(0.1)
+        os.remove(PID)
+    except OSError, e:
+        print str(e)
+        sys.exit(1)
+    sys.exit(0)
+    
+def main():          
     args = parse_arguments()
+    if (args.kill):
+        stopDaemon()
     if (args.daemon):
         daemonize()    
     observer = Observer()
