@@ -34,7 +34,7 @@ class eventHandler(FileSystemEventHandler):
         self.observer = observer
         self.filename = filename
 
-    def on_created(self, event):
+    def on_modified(self, event):
         print "e=", event
         if not event.is_directory and event.src_path.endswith(self.filename):
             print "file created"
